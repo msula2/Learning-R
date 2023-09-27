@@ -1,0 +1,4 @@
+"0","# Keep only the data for planes, motorcycles and cars"
+"0","sales_pmc <- filter(sales_local, PRODUCTLINE %in% c(""Planes"", ""Motorcycles"", ""Classic Cars""))"
+"0","# Count how many are in each PRODUCTLINE"
+"0","sales_count <- count(sales_pmc, PRODUCTLINE)"
