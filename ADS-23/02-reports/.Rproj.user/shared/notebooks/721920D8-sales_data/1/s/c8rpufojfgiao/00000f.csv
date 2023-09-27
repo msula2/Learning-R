@@ -1,0 +1,13 @@
+"0","#Read data from file"
+"0","sales_local <- read_csv(""data/sales_data_sample.csv"")"
+"2","[1mRows: [22m[34m2823[39m [1mColumns: [22m[34m25[39m"
+"2","[36m──[39m [1mColumn specification[22m [36m─────────────────────────────────────────────────────────────────────────────────────[39m
+[1mDelimiter:[22m "",""
+[31mchr[39m (16): ORDERDATE, STATUS, PRODUCTLINE, PRODUCTCODE, CUSTOMERNAME, PHONE, ADDRESSLINE1, ADDRESSLINE2, C...
+[32mdbl[39m  (9): ORDERNUMBER, QUANTITYORDERED, PRICEEACH, ORDERLINENUMBER, SALES, QTR_ID, MONTH_ID, YEAR_ID, MSRP"
+"2","
+[36mℹ[39m Use `spec()` to retrieve the full column specification for this data.
+[36mℹ[39m Specify the column types or set `show_col_types = FALSE` to quiet this message."
+"0","kable(sales_local)"
+"2","Error: pandoc document conversion failed with error 2
+"

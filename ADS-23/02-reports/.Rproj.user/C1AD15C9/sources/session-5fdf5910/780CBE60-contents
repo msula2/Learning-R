@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(kableExtra)
 ```
 
 ```{r}
@@ -20,6 +21,14 @@ sales_local <- read_csv("data/sales_data_sample.csv")
 sales_pmc <- filter(sales_local, PRODUCTLINE %in% c("Planes", "Motorcycles", "Classic Cars"))
 # Count how many are in each PRODUCTLINE
 sales_counts <- count(sales_pmc, PRODUCTLINE)
+k <- kable(sales_counts, 
+      col.names = c("Product", "Sales"),
+      caption = "Number of sales per product line.", 
+      align = "c")
+k_style <- kable_classic(k, full_width = FALSE) 
+k_highlighted <- row_spec(k_style, row = 0, bold = TRUE, color = "red") 
+
+k_highlighted
 ```
 
 
