@@ -1,0 +1,62 @@
+---
+title: "plots"
+author: "Hamdan Sulaiman"
+date: "2023-09-28"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) #includes ggplot2
+library(patchwork) #inclues multi-part plots
+library(ggthemes) #for plot themes
+library(lubridate) #for manipulating data
+
+theme_set(theme_bw()) #set the theme
+```
+
+```{r}
+#Reorder columns 
+survey_col_types <- cols(
+                      caller_id = col_character(),
+                      employee_id = col_character(),
+                      call_start = col_datetime(format = ""),
+                      wait_time = col_double(),
+                      call_time = col_double(),
+                      issue_category = col_factor(levels = c("tech", "sales", "returns", "other")),
+                      satisfaction = col_integer()
+                      )
+#Read data from csv file
+survey_data <- read_csv("https://psyteachr.github.io/ads-v2/data/survey_data.csv", col_types = survey_col_types)
+
+```
+
+```{r}
+#Create plot
+#Aspects of the plot, such as xaxis, yaxis, line color etc are listed inside the aes() function, this is set equal to mapping
+#Plotting is done in layer by layer fashion, Layer 1 is the blank plot space, in Layer 2 the variables are specified using aes(), in Layer 3 the data points are visualized using geom() which specifies the type of visualization and so on
+#Layers can be added using plus sign
+scatter_plot <- ggplot(survey_data, aes(x = wait_time, y = call_time)) +
+  geom_point(colour = "dodgerblue",
+             alpha = 0.2, # scatterplot
+             shape = 18,
+             size = 2) + 
+  geom_smooth(method = lm, # line of best fit
+              formula = y~x,
+              color = rgb(0, .5, .8),
+              linetype = 3) + 
+  #customize axis labels and breaks
+  scale_x_continuous(name = "Wait Time (seconds)",
+                     breaks = seq(from = 0, to = 600, by = 60)) +
+  scale_y_continuous(name = "Call time (seconds)",
+                     breaks = seq(from = 0 , to = 600, by = 30)) +
+  #set axis limits
+  coord_cartesian(xlim = c(0, 360), ylim = c(0, 180))+
+  # change the theme
+  ggthemes::theme_gdocs(base_size = 10) + 
+   # customize theme elements
+  theme(axis.line.x = element_blank(),
+        plot.background = element_blank())
+    
+scatter_plot
+```
