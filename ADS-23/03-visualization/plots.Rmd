@@ -31,7 +31,7 @@ survey_data <- read_csv("https://psyteachr.github.io/ads-v2/data/survey_data.csv
 
 ```
 
-```{r}
+```{r fig-wait-vs-call, fig.cap="As wait time increases, call time increases.", fig.alt="A scatterplot showing wait time on the x-axis (range 0-360 seconds) and call time on the y-axis (range 0-180 seconds) with a trend line showing that as wait time increases, call time increases from about 60 wait/30 call to about 300 wait/65 call."}
 #Create plot
 #Aspects of the plot, such as xaxis, yaxis, line color etc are listed inside the aes() function, this is set equal to mapping
 #Plotting is done in layer by layer fashion, Layer 1 is the blank plot space, in Layer 2 the variables are specified using aes(), in Layer 3 the data points are visualized using geom() which specifies the type of visualization and so on
@@ -53,10 +53,17 @@ scatter_plot <- ggplot(survey_data, aes(x = wait_time, y = call_time)) +
   #set axis limits
   coord_cartesian(xlim = c(0, 360), ylim = c(0, 180))+
   # change the theme
-  ggthemes::theme_gdocs(base_size = 10) + 
+  theme_gdocs(base_size = 10) + 
    # customize theme elements
   theme(axis.line.x = element_blank(),
-        plot.background = element_blank())
-    
-scatter_plot
+        plot.background = element_blank()) +
+  #Add labels
+  labs(title = "The relationship between wait time and call time",
+       subtitle = "2020 Call Data",
+       caption = "Figure 1: As wait time increases, call time increases.")
+
+bar_plot <- ggplot(survey_data, aes(x = issue_category)) +
+              geom_bar()
+
+scatter_plot + bar_plot + plot_layout(nrow = 1)
 ```
