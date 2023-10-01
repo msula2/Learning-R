@@ -1,5 +1,5 @@
 ---
-title: "plots"
+title: "Plots"
 author: "Hamdan Sulaiman"
 date: "2023-09-28"
 output: html_document
@@ -8,12 +8,18 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse) #includes ggplot2
-library(patchwork) #inclues multi-part plots
+library(patchwork) #includes multi-part plots
 library(ggthemes) #for plot themes
 library(lubridate) #for manipulating data
 
 theme_set(theme_bw()) #set the theme
 ```
+
+### Learning Objectives
+  - Understand the installation and usage of packages such as ggplot2 (part of tidyverse) for plotting and visualizing data-sets
+  - Understand the process of reading data from a csv file and modifying columns to contain required data types 
+  - Understand the usage of the ggplot function and its parameters
+  - Understand the layer by layer approach that is adopted to plot visuals such as scatter plots or bar charts (each plus sign in the ggplot function marks a new layer)
 
 ```{r}
 #Reorder columns 
@@ -31,14 +37,14 @@ survey_data <- read_csv("https://psyteachr.github.io/ads-v2/data/survey_data.csv
 
 ```
 
-```{r fig-wait-vs-call, fig.cap="As wait time increases, call time increases.", fig.alt="A scatterplot showing wait time on the x-axis (range 0-360 seconds) and call time on the y-axis (range 0-180 seconds) with a trend line showing that as wait time increases, call time increases from about 60 wait/30 call to about 300 wait/65 call."}
+```{r fig-wait-vs-call, fig.alt="A scatterplot showing wait time on the x-axis (range 0-360 seconds) and call time on the y-axis (range 0-180 seconds) with a trend line showing that as wait time increases, call time increases from about 60 wait/30 call to about 300 wait/65 call."}
 #Create plot
 #Aspects of the plot, such as xaxis, yaxis, line color etc are listed inside the aes() function, this is set equal to mapping
 #Plotting is done in layer by layer fashion, Layer 1 is the blank plot space, in Layer 2 the variables are specified using aes(), in Layer 3 the data points are visualized using geom() which specifies the type of visualization and so on
 #Layers can be added using plus sign
-scatter_plot <- ggplot(survey_data, aes(x = wait_time, y = call_time)) +
+ggplot(survey_data, aes(x = wait_time, y = call_time)) +
   geom_point(colour = "dodgerblue",
-             alpha = 0.2, # scatterplot
+             alpha = 0.2, # scatter plot
              shape = 18,
              size = 2) + 
   geom_smooth(method = lm, # line of best fit
@@ -61,9 +67,42 @@ scatter_plot <- ggplot(survey_data, aes(x = wait_time, y = call_time)) +
   labs(title = "The relationship between wait time and call time",
        subtitle = "2020 Call Data",
        caption = "Figure 1: As wait time increases, call time increases.")
+```
+```{r fig-category-bar, fig.alt="A barchart showing the number of issues recieved by category"}
+ggplot(survey_data, aes(x = issue_category, fill = issue_category)) +
+    geom_bar() +
+    scale_x_discrete(
+    # change axis title
+    name = "Issue Category", 
+    # change order
+    limits = c("tech", "returns", "sales", "other"), 
+    # change labels
+    labels = c("Technical", "Returns", "Sales", "Other") 
+  ) +
+  scale_fill_manual(
+    # change colors
+    values = c(tech = "goldenrod", 
+                returns = "darkgreen", 
+                sales = "dodgerblue3", 
+                other = "purple3"),
+    # remove the legend
+    guide = "none" 
+  ) +
+  scale_y_continuous(
+    name = "", # remove axis title
+    # remove the space above and below the y-axis
+    expand = expansion(add = 0)
+  ) +
+  # minimum = 0, maximum = 350
+  coord_cartesian(ylim = c(0, 350)) + 
+  # change the theme
+  theme_gdocs(base_size = 10) + 
+   # customize theme elements
+  theme(axis.line.x = element_blank(),
+        plot.background = element_blank()) +
+  #Add labels
+  labs(title = "Number of Issues Recived per Category",
+       subtitle = "2020 Call Data",
+       caption = "Figure 2: The Technical department recieved the highest number of issues.")
 
-bar_plot <- ggplot(survey_data, aes(x = issue_category)) +
-              geom_bar()
-
-scatter_plot + bar_plot + plot_layout(nrow = 1)
 ```
