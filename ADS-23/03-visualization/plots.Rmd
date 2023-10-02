@@ -34,7 +34,6 @@ survey_col_types <- cols(
                       )
 #Read data from csv file
 survey_data <- read_csv("https://psyteachr.github.io/ads-v2/data/survey_data.csv", col_types = survey_col_types)
-
 ```
 
 ```{r fig-wait-vs-call, fig.alt="A scatterplot showing wait time on the x-axis (range 0-360 seconds) and call time on the y-axis (range 0-180 seconds) with a trend line showing that as wait time increases, call time increases from about 60 wait/30 call to about 300 wait/65 call."}
@@ -106,3 +105,41 @@ ggplot(survey_data, aes(x = issue_category, fill = issue_category)) +
        caption = "Figure 2: The Technical department recieved the highest number of issues.")
 
 ```
+```{r}
+#Histogram
+ggplot(survey_data, aes(x = wait_time)) +
+  geom_histogram(binwidth = 30, boundary = 0, fill = "white", color = "black") +
+  scale_x_continuous(name = "Wait Time (seconds)", breaks = seq(0, 600, 60)) +
+  # change the theme
+  theme_gdocs(base_size = 10) + 
+  # customize theme elements
+  theme(axis.line.x = element_blank(),
+        plot.background = element_blank()) +
+  #Add labels
+  labs(title = "Wait Time for Calls",
+       subtitle = "2020 Call Data",
+       caption = "Figure 3: Most calls had to a wait time between 180 - 210 seconds")
+
+  
+
+```
+```{r}
+# area plot
+ggplot(survey_data, mapping = aes(x = wait_time, fill = issue_category)) +
+  geom_area(stat = "bin", 
+            boundary = 0, 
+            binwidth = 15, 
+            color = "black") +
+  # change the theme
+  theme_gdocs(base_size = 10) + 
+  # customize theme elements
+  theme(axis.line.x = element_blank(),
+        plot.background = element_blank()) +
+  #Add labels
+  labs(title = "Wait Time for Calls by Category",
+       subtitle = "2020 Call Data",
+       caption = "Figure 4: Most of the calls were recieved by the Technical department")
+  
+```
+
+
