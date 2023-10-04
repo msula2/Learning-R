@@ -1,0 +1,34 @@
+---
+title: "starwars_report"
+author: "Hamdan Sulaiman"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(rio)
+```
+```{r}
+#Modify column specifications
+cols_modified <- cols(
+  name = col_character(),
+  height = col_double(),
+  mass = col_double(),
+  hair_color = col_factor(),
+  skin_color = col_factor(),
+  eye_color = col_factor(),
+  birth_year = col_double(),
+  sex = col_factor(),
+  gender = col_factor(),
+  homeworld = col_factor(),
+  species = col_factor(),
+  films = col_skip(),
+  vehicles = col_skip(),
+  starships = col_skip()
+)
+#Save data to a csv file
+data_starwars <- readr::read_csv("data/starwars.csv", col_types = cols_modified)
+```
+

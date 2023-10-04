@@ -1,0 +1,85 @@
+---
+title: "data"
+author: "Hamdan Sulaiman"
+date: "2023-10-04"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse) # includes readr & tibble
+library(rio) # for almost any data import/export
+library(haven) # for SPSS, Stata,and SAS files
+library(readxl) # for Excel files
+library(googlesheets4)  # for Google Sheets
+```
+```{r}
+#Examples of importing data
+demo_tsv  <- import("data/demo.tsv")  # tab-separated values
+demo_csv  <- import("data/demo.csv")  # comma-separated values
+demo_xls  <- import("data/demo.xlsx") # Excel format
+demo_sav  <- import("data/demo.sav")  # SPSS format
+gs4_deauth() # skip authorization for public data
+demo_gs4  <- googlesheets4::read_sheet( # google sheet
+  ss = "16dkq0YL0J7fyAwT1pdgj1bNNrheckAU_2-DKuuM6aGI"
+)
+```
+```{r}
+#Usage of readr function to import, readr functions can be used to import specific file and explain what data type each column is
+demo_tsv <- readr::read_tsv("data/demo.tsv")
+demo_csv <- readr::read_csv("data/demo.csv")
+demo_xls <- readxl::read_excel("data/demo.xlsx")
+demo_sav <- haven::read_sav("data/demo.sav")
+
+#Modify columns, such as factor columns will be imported as character data types, hence we have to set it manually using col_factor() and set the order of levels using the levels argument
+corrected_cols <- cols(
+  character = col_character(),
+  factor = col_factor(levels = c("low", "med", "high")),
+  integer = col_integer(),
+  double = col_double(),
+  logical = col_logical(),
+  date = col_date(format = "%Y-%m-%d")
+)
+demo <- readr::read_csv("data/demo.csv", col_types = corrected_cols)
+```
+```{r}
+#Create data using tibble
+avatar <- tibble(
+  name = c("Katara", "Toph", "Sokka"),
+  bends = c("water", "earth", NA),
+  friendly = TRUE
+)
+
+avatar_by_row <- tribble(
+  ~name,   ~bends,   ~friendly,
+  "Katara", "water", TRUE,
+  "Soph",   "earth", TRUE,
+  "Sokka",  NA, TRUE
+)
+
+family <- tibble(
+  Name = c("Shoaib", "Yasmeen", "Ahsan", "Asna"),
+  Relationship = c("Father", "Mother", "Brother", "Sister"),
+  Married = TRUE
+)
+```
+```{r}
+#Troubleshooting
+ct <- cols(
+  junk = col_skip(),
+  order = col_integer(),
+  good = col_logical(),
+  date = col_date(format = "%Y-%m-%d")
+)
+tidier <- readr::read_csv("data/mess.csv",
+                        skip = 2,
+                        na = "missing",
+                        col_types = ct,
+                        lazy = FALSE
+                        )
+```
+
+
+
+
+
