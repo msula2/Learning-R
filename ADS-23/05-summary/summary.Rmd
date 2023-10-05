@@ -1,0 +1,97 @@
+---
+title: "summary"
+author: "Hamdan Sulaiman"
+date: "2023-10-05"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)   # data wrangling functions
+library(kableExtra)  # for nice tables
+```
+```{r}
+#Load data from .rds file
+tweets <- readRDS("data/ncod_tweets.rds")
+```
+```{r}
+#summarise takes in the data table we want to summarise, it will create a new table, the column names for this table are the arguments on the left
+tweet_summary <- tweets %>%
+  summarise(
+    mean_favs = mean(favorite_count),
+    median_favs = quantile(favorite_count, .5),
+    n = n(),
+    min_date = min(created_at),
+    max_date = max(created_at)
+  )
+glimpse(tweet_summary)
+```
+```{r}
+#Using pipes and $ can allow for quickly extracting values which is useful in reports
+date_from <- tweet_summary$min_date %>% format("%Y %d %B")
+date_to <- tweet_summary$max_date %>% format("%Y %d %B")
+```
+There were `r tweet_summary$n` tweets between `r date_from` and `r date_to`
+
+```{r}
+#Count function can be used to count categorical data, in our case since each row is a tweet and is associated with a screen name we can get the number of tweets per user
+tweets_per_user <- tweets %>%
+  count(screen_name, sort = TRUE)
+
+#The combination of slice and pull allows us to choose a single observation from a single variable
+unique_users <- nrow(tweets_per_user)
+most_prolific <- slice(tweets_per_user, 1) %>% 
+  pull(screen_name)
+
+most_prolific_n <- slice(tweets_per_user, 1) %>%
+  pull(n)
+```
+There were `r unique_users` unique accounts tweeting about #NationalComingOutDay. `r most_prolific` was the most prolific tweeter, with `r most_prolific_n` tweets
+```{r}
+#Using group by
+
+verified <- 
+  tweets %>% # Start with the original dataset; and then
+  group_by(verified) %>% # group it; and then
+  summarise( # summarise it by those groups
+    count = n(),
+    mean_favs = mean(favorite_count),
+    mean_retweets = mean(retweet_count)) %>%
+  ungroup()
+verified
+
+verified_source <- 
+  tweets %>%
+  group_by(source, verified) %>%
+  summarise(
+    count = n(),
+    mean_favs = mean(favorite_count),
+    mean_retweets = mean(retweet_count)
+  ) %>%
+  ungroup() %>%
+  arrange(desc(count))
+head(verified_source)
+
+most_fav <- tweets %>%
+  group_by(is_quote) %>%
+  filter(favorite_count == max(favorite_count)) %>%
+  sample_n(size = 1) %>%
+  ungroup()
+most_fav
+```
+```{r}
+orig <- filter(most_fav,is_quote == FALSE)
+quote <- filter(most_fav,is_quote == TRUE)
+
+```
+The most favourited `r orig$favorite_count` original tweet was by [`r orig$screen_name`](`r orig$status_url`):
+
+--------------------------------------------------
+  
+> `r orig$text`
+
+![](`r orig$ext_media_url`)
+
+--------------------------------------------------
+
+
