@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(rio)
+library(ggthemes)
 ```
 ```{r}
 #Modify column specifications
@@ -31,4 +32,38 @@ cols_modified <- cols(
 #Save data to a csv file
 data_starwars <- readr::read_csv("data/starwars.csv", col_types = cols_modified)
 ```
+```{r}
+histogram <- ggplot(data_starwars, aes(x = height)) +
+  geom_histogram(binwidth = 25, fill = "gray", color = "black", alpha = .3) +
+  scale_x_continuous(name = "height", breaks = seq(75, 275, 25)) +
+  theme_classic() +
+  labs(title = "Height (cm) distribution of Star Wars Characters")
+
+histogram
+```
+```{r}
+scatterplot <- ggplot(data_starwars, aes(x = height, y = mass)) +
+    geom_point() +
+    scale_x_continuous(name = "height", breaks = seq(0, 300, 50)) +
+    coord_cartesian(xlim = c(0,300)) +
+    scale_y_continuous(name = "mass", breaks = seq(0, 1400, 100)) +
+    theme_classic() +
+    labs(title = "Mass (kg) by height (cm) distribution of Star Wars Characters")
+scatterplot
+```
+```{r}
+barchart <- ggplot(data_starwars, aes(x = gender, fill = gender)) +
+  geom_bar(show.legend = FALSE, color = "black") +
+  scale_x_discrete(
+    name = "Gender of character", 
+    labels = c("Masculine", "Feminine", "Missing")
+    ) +
+  scale_fill_brewer(palette = 2) +
+  labs(title = "Number of Star Wars characters of each gender") +
+  theme_bw()
+barchart
+```
+
+
+
 
