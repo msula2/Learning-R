@@ -1,0 +1,159 @@
+---
+title: "Video game review report"
+author: "Hamdan Sulaiman"
+output:
+  html_document:
+    df_print: paged
+    theme: 
+      version: 4
+      bootswatch: yeti
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 3
+    number_sections: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(tidyverse)
+library(kableExtra)
+library(ggthemes)
+```
+```{r}
+#Import data and modify columns such as the ratings should be of type factor
+modified_cols <- cols(
+  rating = col_double(),
+  verified = col_logical(),
+  year = col_double(),
+  reviewerName = col_character()
+  
+)
+data_video_games <- readr::read_csv("data/review_data.csv", col_types = modified_cols)
+```
+```{r}
+#Extract information to give overview of data using summarise
+data_overview <- data_video_games %>%
+  summarise(
+    min_date = min(year),
+    max_date = max(year),
+    no_reviews = n()
+  )
+
+```
+## Report overview
+This report summarises reviews submitted for Video games products on Amazon from **`r data_overview$min_date`** to **`r data_overview$max_date`** made available by [Ni et al.(2019)](https://nijianmo.github.io/amazon/#subsets). In total there were **`r data_overview$no_reviews`** in the dataset.
+
+## Number of reviews by year
+The below histogram shows the number of video game reviews submitted to Amazon by year. From 1999 reviews largely increased year-on-year which is unsurprising given the growth of Amazon and access to the internet. The dataset shows the peak number of reviews was 2015 with a decline from 2016 to 2018. It is likely that this reflects the dataset being incomplete for recent years rather than the number of reviews declining in reality.
+
+```{r}
+reviews_hist <- ggplot(data_video_games, aes(x = year)) +
+  geom_histogram(color = "black", fill = "white", binwidth = 1, alpha = 0.8) +
+  scale_x_continuous(breaks = seq(1999, 2018,1)) +
+  theme_fivethirtyeight() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1)) +
+  labs(title = "Number of reviews per year", subtitle = "1999 to 2018")
+
+reviews_hist
+  
+```
+
+## Verified users
+The dataset contains details of whether the review was based on a verified purchase. From 
+[Amazon Community](https://www.amazon.co.uk/gp/help/customer/display.html?nodeId=G75XTB7MBMBTXP6W):
+
+> An "Amazon Verified Purchase" review means that we’ve verified that the person writing the review purchased the product from Amazon, and didn’t receive the product at a big discount. Reviews that are not marked “Amazon Verified Purchase” are valuable as well, but, either we cannot confirm that the product was purchased from Amazon, or that the customer paid a price that is available to most Amazon shoppers.
+
+Table 1 shows the number of reviews based on verified and unverified purchases.
+
+```{r fig-verified, fig.cap="Table 1. Number of reviews by purchase staus"}
+data_verified_grouped <- data_video_games %>% group_by(verified)
+verified <- data_verified_grouped %>% 
+  summarise(
+    Reviews = n()
+  ) %>%
+  ungroup()
+kable(verified,
+      col.names = c("Verified", "Reviews"),
+      align = "c"
+      ) %>%
+kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T)
+```
+
+Whilst the number of verified reviews is substantially larger than the number of unverified reviews, the below histogram demonstrates that this has not been a consistent trend and that the large increase in the number of reviews is largely driven by an increase in verified reviews.
+
+```{r}
+verified_hist <- ggplot(data_video_games, aes(x = year, fill = verified)) +
+  geom_histogram(color = "black", binwidth = 1, alpha = 0.8) +
+  scale_x_continuous(breaks = seq(1999, 2018,1)) +
+  theme_fivethirtyeight() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust=1), legend.title = element_blank()) +
+  scale_fill_discrete(labels = c("Unverified", "Verified")) +
+  labs(title = "Number of reviews per year", subtitle = "By purchase status")
+
+verified_hist
+  
+```
+
+## Review ratings
+
+### Overall
+
+Amazon review ratings are provided on a scale of 1 (worst) to 5 (best) stars. The histogram below shows the total number of reviews assigned each rating.
+
+```{r}
+options(scipen = 999)
+ratings_bar <- ggplot(data_video_games, aes(x = rating)) +
+  geom_bar(color = "black", fill = "white") + 
+  scale_y_continuous() +
+  labs(title = "Review ratings", subtitle = "Number of reviews for each rating") + 
+  theme_fivethirtyeight()
+ratings_bar
+```
+
+### By purchase status
+However, if you break this data down by verified purchases status you can see that whilst the number of verified and unverified reviews with 1 to 4 star reviews are similar, there is a very large number of 5 star reviews for verified purchases compared to unverified purchases.
+
+```{r}
+options(scipen = 999)
+verified_ratings_bar <- ggplot(data_video_games, aes(x = rating, fill = verified)) +
+  geom_bar(color = "black", position = "dodge") + 
+  scale_y_continuous() +
+  labs(title = "Review ratings", subtitle = "Number of reviews for each rating") + 
+  scale_fill_discrete(labels = c("Unverified", "Verified")) +
+  theme_fivethirtyeight() +
+  theme(legend.title = element_blank()) 
+  
+    
+verified_ratings_bar
+```
+
+## Averga ratings
+
+### By purchase status
+
+Average ratings for verified reviews were higher (both mean and median) than for unverified review, likely driven by the number of 5-star reviews for verified reviews.
+
+```{r}
+data_verified_grouped %>%
+  summarise(
+    mean_rating = mean(rating),
+    median_rating = median(rating)
+  ) %>%
+  ungroup() %>%
+  kable(
+      col.names = c("Verified", "Mean rating", "Median rating"),
+      align = "c"
+      ) %>%
+kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T)
+```
+
+
+
+
+
+
+
+
