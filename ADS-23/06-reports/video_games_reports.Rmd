@@ -1,6 +1,7 @@
 ---
 title: "Video game review report"
 author: "Hamdan Sulaiman"
+date: "7/10/2023"
 output:
   html_document:
     df_print: paged
@@ -16,11 +17,17 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(kableExtra)
 library(ggthemes)
 ```
+
+## Learning Objectives
+  - Using group_by, summarise, count and piping to extract values from data, in the report these values are bolded and are part of tables
+  - Display the results in tables using kable package and in markdown by using $ to extract values from objects
+  - Plot histograms and bar charts to visualize data
+  
 ```{r}
 #Import data and modify columns such as the ratings should be of type factor
 modified_cols <- cols(
@@ -42,6 +49,7 @@ data_overview <- data_video_games %>%
   )
 
 ```
+
 ## Report overview
 This report summarises reviews submitted for Video games products on Amazon from **`r data_overview$min_date`** to **`r data_overview$max_date`** made available by [Ni et al.(2019)](https://nijianmo.github.io/amazon/#subsets). In total there were **`r data_overview$no_reviews`** in the dataset.
 
@@ -49,6 +57,7 @@ This report summarises reviews submitted for Video games products on Amazon from
 The below histogram shows the number of video game reviews submitted to Amazon by year. From 1999 reviews largely increased year-on-year which is unsurprising given the growth of Amazon and access to the internet. The dataset shows the peak number of reviews was 2015 with a decline from 2016 to 2018. It is likely that this reflects the dataset being incomplete for recent years rather than the number of reviews declining in reality.
 
 ```{r}
+#Plot histogram showing reviews per year
 reviews_hist <- ggplot(data_video_games, aes(x = year)) +
   geom_histogram(color = "black", fill = "white", binwidth = 1, alpha = 0.8) +
   scale_x_continuous(breaks = seq(1999, 2018,1)) +
@@ -69,6 +78,7 @@ The dataset contains details of whether the review was based on a verified purch
 Table 1 shows the number of reviews based on verified and unverified purchases.
 
 ```{r fig-verified, fig.cap="Table 1. Number of reviews by purchase staus"}
+#Use group_by to group data into two categories: verified and unverified and then determine number of reviews in each category
 data_verified_grouped <- data_video_games %>% group_by(verified)
 verified <- data_verified_grouped %>% 
   summarise(
@@ -85,6 +95,7 @@ kable_styling(bootstrap_options = c("hover", "condensed"), full_width = T)
 Whilst the number of verified reviews is substantially larger than the number of unverified reviews, the below histogram demonstrates that this has not been a consistent trend and that the large increase in the number of reviews is largely driven by an increase in verified reviews.
 
 ```{r}
+#Plot histogram that shows number of reviews per year and tells user if they were unverfied or verified
 verified_hist <- ggplot(data_video_games, aes(x = year, fill = verified)) +
   geom_histogram(color = "black", binwidth = 1, alpha = 0.8) +
   scale_x_continuous(breaks = seq(1999, 2018,1)) +
@@ -104,6 +115,7 @@ verified_hist
 Amazon review ratings are provided on a scale of 1 (worst) to 5 (best) stars. The histogram below shows the total number of reviews assigned each rating.
 
 ```{r}
+#Plot barchart showing the number of reviews by rating
 options(scipen = 999)
 ratings_bar <- ggplot(data_video_games, aes(x = rating)) +
   geom_bar(color = "black", fill = "white") + 
@@ -117,6 +129,7 @@ ratings_bar
 However, if you break this data down by verified purchases status you can see that whilst the number of verified and unverified reviews with 1 to 4 star reviews are similar, there is a very large number of 5 star reviews for verified purchases compared to unverified purchases.
 
 ```{r}
+#Plot barchart showing the number of reviews by rating and informs user whether reviews are verified or unverified
 options(scipen = 999)
 verified_ratings_bar <- ggplot(data_video_games, aes(x = rating, fill = verified)) +
   geom_bar(color = "black", position = "dodge") + 
@@ -130,13 +143,14 @@ verified_ratings_bar <- ggplot(data_video_games, aes(x = rating, fill = verified
 verified_ratings_bar
 ```
 
-## Averga ratings
+## Average ratings
 
 ### By purchase status
 
 Average ratings for verified reviews were higher (both mean and median) than for unverified review, likely driven by the number of 5-star reviews for verified reviews.
 
 ```{r}
+#Use group_by to group data into two categories: verified and unverified, extract the mean and median ratings per category
 data_verified_grouped %>%
   summarise(
     mean_rating = mean(rating),
