@@ -6,11 +6,13 @@ ui <- fluidPage(titlePanel("Addition Demo"),
                verticalLayout(
                    numericInput(
                      inputId = "first_num",
-                     label = "First number"
+                     label = "First number",
+                     value = 0
                    ),
                    numericInput(
                      inputId = "second_num",
-                     label = "Second number"
+                     label = "Second number",
+                     value = 0
                    ),
                    actionButton(
                      inputId = "calc_sum",
