@@ -43,7 +43,7 @@ ui <- dashboardPage(
         icon = icon("crow")
       ),
       menuItem(
-        "Spider",
+        "Spiders",
         tabName = "spiders_tab",
         icon = icon("spider")
       )
@@ -80,13 +80,6 @@ ui <- dashboardPage(
                         value = 0,
                         step = 1,
                         width = "100%"),
-            selectInput("dog_select", 
-                        label = "Do you think dogs are: ", 
-                        choices = list("", 
-                                       "Friendly" = "friendly", 
-                                       "Non-Friendly" = "non-friendly"),
-                        selected = NULL,
-                        width = "100%"),
             actionButton(
               inputId = "submit_dog",
               label = "Submit",
@@ -121,13 +114,6 @@ ui <- dashboardPage(
                         value = 0,
                         step = 1,
                         width = "100%"),
-            selectInput("cat_select", 
-                        label = "Do you think cats are: ", 
-                        choices = list("", 
-                                       "Friendly" = "friendly", 
-                                       "Non-Friendly" = "non-friendly"),
-                        selected = NULL,
-                        width = "100%"),
             actionButton(
               inputId = "submit_cat",
               label = "Submit",
@@ -161,13 +147,6 @@ ui <- dashboardPage(
                         value = 0,
                         step = 1,
                         width = "100%"),
-            selectInput("bird_select", 
-                        label = "Do you think birds are: ", 
-                        choices = list("", 
-                                       "Friendly" = "friendly", 
-                                       "Non-Friendly" = "non-friendly"),
-                        selected = NULL,
-                        width = "100%"),
             actionButton(
               inputId = "submit_bird",
               label = "Submit",
@@ -200,13 +179,6 @@ ui <- dashboardPage(
                         value = 0,
                         step = 1,
                         width = "100%"),
-            selectInput("spider_select", 
-                        label = "Do you think spiders are: ", 
-                        choices = list("", 
-                                       "Friendly" = "friendly", 
-                                       "Non-Friendly" = "non-friendly"),
-                        selected = NULL,
-                        width = "100%"),
             actionButton(
               inputId = "submit_spider",
               label = "Submit",
@@ -226,7 +198,7 @@ ui <- dashboardPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
-  slider <- reactiveValues(vals = c(0,0,0,0,0), labels = c("Dogs", "Cats", "Scorpions", "Snakes", "Birds"))
+  slider <- reactiveValues(vals = c(0,0,0,0), labels = c("Dogs", "Cats", "Spiders", "Birds"))
   
   observeEvent(input$submit_dog, {
     selected_index <- which(slider$labels == "Dogs")
@@ -287,7 +259,7 @@ server <- function(input, output) {
     data <- data.frame(Name = slider$labels,
                        Score = slider$vals)
     
-    output$sliderPlotBird <- renderPlot({
+    output$sliderPlotSpider <- renderPlot({
       ggplot(data, aes(x = Name, y = Score)) +
         geom_bar(stat = "identity", fill = "skyblue") +
         labs(title = "Willingness to keep pet", x = "Name", y = "Willingness") +
