@@ -54,8 +54,7 @@ ui <- dashboardPage(
               )
             ),
             selectizeInput("variable", label = "Choose a variable to learn more about it", choices = NULL),
-            uiOutput("about_variable"),
-            textOutput("result")
+            uiOutput("about_variable")
           )
         ),
         column(
