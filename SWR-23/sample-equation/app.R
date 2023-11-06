@@ -20,6 +20,11 @@ ui <- dashboardPage(
         "Line Equation",
         tabName = "line_tab",
         icon = icon("chart-line")
+      ),
+      menuItem(
+        "Penman-Monteith Equation",
+        tabName = "pm_tab",
+        icon = icon("droplet")
       )
     )
   ),
@@ -76,7 +81,36 @@ ui <- dashboardPage(
             )
           )
         )
+      ),
+      tabItem(
+        tabName = "pm_tab",
+        column(
+          width = 6,
+          box(
+            width = 12,
+            title = "About",
+            collapsible = TRUE,
+            p(
+              "The Penman-Monteith equation is a widely used method for calculating 
+              the evapotranspiration (ET) of water from the land surface into the atmosphere. 
+              Evapotranspiration is the combined process of evaporation, which is the loss 
+              of water from the land surface directly into the atmosphere, and transpiration, 
+              which is the release of water vapor from plants through their leaves."
+            ),
+            helpText(
+              HTML(katex_html(
+                "\\lambda{ET} = \\frac{ \\Delta (R_n - G) + \\rho_a c_p \\frac{(e_s - e_a)}{r_a} }{\\Delta + \\gamma(1 + \\frac{r_s}{r_a})}",
+                displayMode = TRUE, 
+                preview = FALSE,
+                include_css = TRUE,
+                output = "html")
+              )
+            )
+          )
+          
+        )
       )
+      
     )
   )
 )
