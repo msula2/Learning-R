@@ -30,15 +30,21 @@ ui <- dashboardPage(
   ),
   dashboardBody(
     tags$head(
+      tags$link(rel = "stylesheet", href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"),
       tags$link(rel="stylesheet", href="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.css", integrity="sha384-9tPv11A+glH/on/wEu99NVwDPwkMQESOocs/ZGXPoIiLE8MU/qkqUcZ3zzL+6DuH", crossorigin="anonymous"),
       tags$script(src="https://cdn.jsdelivr.net/npm/katex@0.10.0-beta/dist/katex.min.js", integrity="sha384-U8Vrjwb8fuHMt6ewaCy8uqeUXv4oitYACKdB0VziCerzt011iQ/0TqlSlv8MReCm", crossorigin="anonymous")
-    ),
-    tags$style(HTML(".main-footer { display: none; } a {display: inline;}")),
+      ),
+      tags$script(HTML('
+        $(document).ready(function() { 
+        $(".info").tooltip(); 
+        });
+    ')),
+    tags$style(HTML(".main-footer { display: none; } a {display: inline;} .tooltip-inner {background-color: #336699; color: #ffffff;border-radius: 5px; } .tooltip.bs-tooltip-top .tooltip-arrow::before {border-top-color: #336699;}")),
     tabItems(
       tabItem(
         tabName = "line_tab",
         column(
-          width = 6,
+          width = 4,
           box(
             width = 12,
             title = "About",
@@ -63,8 +69,11 @@ ui <- dashboardPage(
           )
         ),
         column(
-          width = 6,
-          uiOutput("change_values"),
+          width = 4,
+          uiOutput("change_values")
+        ),
+        column(
+          width = 4,
           tabBox(
             width = 12,
             title = "Statistics",
@@ -76,7 +85,6 @@ ui <- dashboardPage(
             ),
             tabPanel(
               title = "Graphs",
-              selectizeInput("plot_type", label = "Plot by:", choices = NULL),
               plotOutput("plots")
             )
           )
@@ -125,8 +133,8 @@ server <- function(input, output, session) {
   var_texts <- list("y", "m", "x","c")
   vars <- setNames(var_ids, var_texts)
   
-  var_ids_plot <- list("m", "x", "c");
-  var_texts_plot <- list("m", "x","c")
+  var_ids_plot <- list("m", "x", "c", "d", "e");
+  var_texts_plot <- list("m", "x","c", "d", "e")
   vars_plot <- setNames(var_ids_plot, var_texts_plot)
   
   
@@ -190,32 +198,51 @@ server <- function(input, output, session) {
   })
   
   output$change_values <- renderUI({
-    fluidRow(
-      box(
-        width = 12,
-        title = "Change Values",
-        collapsible = TRUE,
-        column(width = 6,
-               sliderInput("m", HTML(katex_html("m", displayMode = FALSE)), min = 0, max = 5, value = 1, step = 1)
+    box(
+      width = 12,
+      title = "Set Arguments",
+      collapsible = TRUE,
+      selectizeInput("plot_type", label = "Plot by:", choices = NULL),
+      div(
+        style = "display: flex; justify-content: space-evenly;",
+        textInput("min", 
+                  label = "Minimum",
+                  value = "", 
+                  width = "30%"
         ),
-        column(width = 6,
-               sliderInput("x", HTML(katex_html("x", displayMode = FALSE)), min = 0, max = 10, value = 1, step = 1)
-        ),
-        column(width = 6,
-               sliderInput("c", HTML(katex_html("c", displayMode = FALSE)), min = -2, max = 2, value = 0, step = 1)
-        ),
-        column(width = 6,
-               actionButton(
-                 style = "margin: 40px;",
-                 inputId = "submit",
-                 label = "Submit",
-                 icon = icon("plus")
-               )
+        textInput("max", 
+                  label = "Maximum",
+                  value = "",
+                  width = "30%"
         )
-      )
+      ),
+      uiOutput("default_values")
       
     )
     
+  })
+  
+  output$default_values <- renderUI({
+    inputs <- lapply(names(vars_plot), function(var_id) {
+      if (var_id != input$plot_type) {
+        label_html <- paste0(
+          katex_html(vars_plot[[var_id]], displayMode = FALSE),
+          sprintf('<i class="fa-regular fa-circle-question info" style="color: #c0bfbc; margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', var_id)
+        )
+        return(
+          column(
+            width = 6,
+            textInput(var_id,
+                      label = HTML(label_html),
+                      value = "",
+                      width = "100%"
+            )    
+          )
+        )
+      }
+    })
+    
+    fluidRow(inputs)
   })
   
   observeEvent(input$submit, {
