@@ -84,7 +84,7 @@ ui <- dashboardPage(
                                   height = "auto")
             ),
             tabPanel(
-              title = "Graphs",
+              title = "Graph",
               plotOutput("plots")
             )
           )
@@ -133,9 +133,12 @@ server <- function(input, output, session) {
   var_texts <- list("y", "m", "x","c")
   vars <- setNames(var_ids, var_texts)
   
-  var_ids_plot <- list("m", "x", "c", "d", "e");
-  var_texts_plot <- list("m", "x","c", "d", "e")
+  var_ids_plot <- list("m", "x", "c");
+  var_texts_plot <- list("m", "x","c")
   vars_plot <- setNames(var_ids_plot, var_texts_plot)
+  
+
+  vars_def <- list("m" = "Gradient is recommended between 2 - 5","x" = "X value is recommended between 1 -10","c" = "Intercept is recommended between 1-5")
   
   
   updateSelectizeInput(
@@ -203,31 +206,40 @@ server <- function(input, output, session) {
       title = "Set Arguments",
       collapsible = TRUE,
       selectizeInput("plot_type", label = "Plot by:", choices = NULL),
-      div(
-        style = "display: flex; justify-content: space-evenly;",
-        textInput("min", 
-                  label = "Minimum",
-                  value = "", 
-                  width = "30%"
-        ),
-        textInput("max", 
-                  label = "Maximum",
-                  value = "",
-                  width = "30%"
-        )
-      ),
-      uiOutput("default_values")
+      uiOutput("range_values"),
+      uiOutput("default_values"),
+      actionButton(
+        style = "float: right;",
+        inputId = "submit",
+        label = "Submit",
+        icon = icon("check")
+      )
       
     )
     
   })
-  
+  output$range_values <- renderUI({
+    def <- vars_def[[input$plot_type]]
+    label_html <- paste0(
+      katex_html(input$plot_type, displayMode = FALSE),
+      sprintf('<i class="fa-regular fa-circle-question info" style="color: #c0bfbc; margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
+    )
+    div(
+      style = "display: flex; align-items: center; justify-content: space-evenly;",
+      textInput("min", label = "", value = "", width = "30%"),
+      div(HTML(katex_html("\\leq", displayMode = FALSE))),
+      div(HTML(label_html)),
+      div(HTML(katex_html("\\leq", displayMode = FALSE))),
+      textInput("max", label = "", value = "", width = "30%")
+    )
+  })
   output$default_values <- renderUI({
     inputs <- lapply(names(vars_plot), function(var_id) {
       if (var_id != input$plot_type) {
+        def <- vars_def[[var_id]]
         label_html <- paste0(
           katex_html(vars_plot[[var_id]], displayMode = FALSE),
-          sprintf('<i class="fa-regular fa-circle-question info" style="color: #c0bfbc; margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', var_id)
+          sprintf('<i class="fa-regular fa-circle-question info" style="color: #c0bfbc; margin-left: 5px;" data-toggle="tooltip" data-placement="right" title="%s"></i>', def)
         )
         return(
           column(
@@ -246,32 +258,46 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$submit, {
-    new_row <- data.frame(
-      m = input$m,
-      x = input$x,
-      c = input$c,
-      y = input$m * input$x + input$c
-    )
-    v$data <- rbind(v$data, new_row)
+    input_values <- seq(input$min, input$max, length.out = 10)
+    output_var <- "y"
     
+    # Initialize an empty data frame to store the results
+    result_df <- data.frame(matrix(ncol = length(vars), nrow = length(input_values)))
+    colnames(result_df) <- names(vars)
+    
+    for (j in seq_along(vars)) {
+      if (names(vars)[j] == input$plot_type) {
+        result_df[, names(vars)[j]] <- input_values
+      } else if (names(vars)[j] == output_var) {
+        if (input$plot_type == "m") {
+          result_df[, names(vars)[j]] <- input_values * as.numeric(input$x) + as.numeric(input$c)
+        } else if (input$plot_type == "x") {
+          result_df[, names(vars)[j]] <- as.numeric(input$m) * input_values + as.numeric(input$c)
+        } else {
+          result_df[, names(vars)[j]] <- as.numeric(input$m) * as.numeric(input$x) + input_values
+        }
+      } else {
+        result_df[, names(vars)[j]] <- input[[names(vars)[j]]]
+      }
+    }
+    
+    # Assign result_df to v$data
+    v$data <- result_df
   })
+  
   
   output$data_table <- DT::renderDataTable({
     v$data
-  }, options = list(pageLength = 10))
+  }, options = list(pageLength = 5))
   
   output$plots <- renderPlot({
-    if (nrow(v$data)){
+    if (nrow(v$data)) {
       ggplot(v$data, aes(x = .data[[input$plot_type]], y = y)) +
-        geom_point(colour = "dodgerblue", size = 5
-                   ) + 
+        geom_line(color = "dodgerblue", size = 2) +  # Use geom_line instead of geom_point
         scale_x_continuous(name = input$plot_type) +
-        scale_y_continuous(name = "Value of y") +
-        theme_classic() 
-    
-      }
-        
-    
+        scale_y_continuous(name = "y") +
+        theme_classic()
+    }
   })
   
 }
