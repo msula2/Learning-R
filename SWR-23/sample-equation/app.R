@@ -78,12 +78,6 @@ ui <- dashboardPage(
             width = 12,
             title = "Statistics",
             tabPanel(
-              title = "Table",
-              DT::dataTableOutput("data_table",
-                                  width = "100%",
-                                  height = "auto")
-            ),
-            tabPanel(
               title = "Graph",
               plotOutput("plots")
             )
@@ -126,7 +120,11 @@ ui <- dashboardPage(
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   v <- reactiveValues(
-    data = data.frame(y = numeric(), m = numeric(), x = numeric(), c = numeric())
+    data = data.frame(y = numeric(), m = numeric(), x = numeric(), c = numeric()),
+    x = NULL,
+    m = NULL,
+    c = NULL,
+    y = NULL
   )
   
   var_ids <- list("y", "m", "x", "c");
@@ -261,6 +259,19 @@ server <- function(input, output, session) {
     input_values <- seq(input$min, input$max, length.out = 10)
     output_var <- "y"
     
+    inputs <- setdiff(var_ids_plot, input$plot_type)
+    for (inp in inputs){
+      v[[inp]] <- as.numeric(input[[inp]])
+    }
+    range <- setdiff(var_ids_plot, inputs)
+    
+    
+    for (r in range) {
+      v[[r]] <- input_values
+    }
+    
+    v$y <- v$m * v$x + v$c
+    
     # Initialize an empty data frame to store the results
     result_df <- data.frame(matrix(ncol = length(vars), nrow = length(input_values)))
     colnames(result_df) <- names(vars)
@@ -269,27 +280,18 @@ server <- function(input, output, session) {
       if (names(vars)[j] == input$plot_type) {
         result_df[, names(vars)[j]] <- input_values
       } else if (names(vars)[j] == output_var) {
-        if (input$plot_type == "m") {
-          result_df[, names(vars)[j]] <- input_values * as.numeric(input$x) + as.numeric(input$c)
-        } else if (input$plot_type == "x") {
-          result_df[, names(vars)[j]] <- as.numeric(input$m) * input_values + as.numeric(input$c)
-        } else {
-          result_df[, names(vars)[j]] <- as.numeric(input$m) * as.numeric(input$x) + input_values
-        }
+        result_df[, names(vars)[j]] <- v$y
       } else {
         result_df[, names(vars)[j]] <- input[[names(vars)[j]]]
       }
     }
     
+    print(result_df)
+    
     # Assign result_df to v$data
     v$data <- result_df
+    
   })
-  
-  
-  output$data_table <- DT::renderDataTable({
-    v$data
-  }, options = list(pageLength = 5))
-  
   output$plots <- renderPlot({
     if (nrow(v$data)) {
       ggplot(v$data, aes(x = .data[[input$plot_type]], y = y)) +
