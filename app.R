@@ -1,7 +1,7 @@
 # Install and load the shiny package if you haven't already
 # install.packages("shiny")
 # library(shiny)
-
+library(katex)
 # Define the UI for the app
 ui <- fluidPage(
   titlePanel("Simple Shiny App"),
@@ -10,6 +10,16 @@ ui <- fluidPage(
       sliderInput("npoints", "Number of points:", min = 10, max = 100, value = 50)
     ),
     mainPanel(
+      div(
+        HTML(katex_html(
+          "y = mx + c",
+          displayMode = TRUE, 
+          preview = FALSE,
+          include_css = TRUE,
+          output = "html"
+        )
+        )
+      ),
       plotOutput("scatterplot")
     )
   )
