@@ -1,7 +1,6 @@
 # Install and load the shiny package if you haven't already
 # install.packages("shiny")
 # library(shiny)
-library(katex)
 # Define the UI for the app
 ui <- fluidPage(
   titlePanel("Simple Shiny App"),
