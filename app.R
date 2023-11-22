@@ -10,16 +10,7 @@ ui <- fluidPage(
       sliderInput("npoints", "Number of points:", min = 10, max = 100, value = 50)
     ),
     mainPanel(
-      div(
-        HTML(katex_html(
-          "y = mx + c",
-          displayMode = TRUE, 
-          preview = FALSE,
-          include_css = TRUE,
-          output = "html"
-        )
-        )
-      ),
+      p("Hello")
       plotOutput("scatterplot")
     )
   )
